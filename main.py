@@ -221,6 +221,19 @@ class QuizGame:
         print()
         print(f"✅ 퀴즈가 추가되었습니다! (현재 퀴즈 {len(self.quizzes)}개)")
 
+    def show_list(self):
+        """저장된 퀴즈의 문제 목록을 보여준다"""
+        if len(self.quizzes) == 0:
+            print("⚠️ 등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해 주세요.")
+            return
+
+        print()
+        print(f"📋 등록된 퀴즈 목록 (총 {len(self.quizzes)}개)")
+        print()
+        print("-" * 40)
+        for i, quiz in enumerate(self.quizzes, start=1):
+            print(f"[{i}] {quiz.question}")
+        print("-" * 40)
     def show_menu(self):
         """메인 메뉴를 화면에 보여준다"""
         print()
@@ -245,7 +258,7 @@ class QuizGame:
             elif choice == 2:
                 self.add_quiz()
             elif choice == 3:
-                print("📋 퀴즈 목록 (준비 중)")
+                self.show_list()
             elif choice == 4:
                 print("🏆 점수 확인 (준비 중)")
             elif choice == 5:
