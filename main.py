@@ -3,6 +3,8 @@ from pathlib import Path
 
 # 데이터 파일 위치: main.py와 같은 폴더(프로젝트 루트)의 state.json
 STATE_FILE = Path(__file__).parent / "state.json"
+# 백업 파일 위치: 마지막으로 정상 저장된 데이터의 사본
+BACKUP_FILE = Path(__file__).parent / "state.json.bak"
 
 
 class Quiz:
@@ -84,28 +86,41 @@ class QuizGame:
         self.load_data()         # 시작할 때 state.json에서 불러오기
 
     def load_data(self):
-        """state.json에서 퀴즈 목록과 최고 점수를 불러온다"""
+        """state.json에서 불러오고, 손상되었으면 백업 → 기본 퀴즈 순서로 복구한다"""
         if not STATE_FILE.exists():
             print("📂 저장된 데이터가 없어 기본 퀴즈로 시작합니다.")
             self.reset_to_default()
             return
 
         try:
-            with open(STATE_FILE, "r", encoding="utf-8") as file:
-                data = json.load(file)
-
-            quizzes = []
-            for item in data["quizzes"]:
-                quiz = Quiz(item["question"], item["choices"], item["answer"])
-                quizzes.append(quiz)
-
-            self.quizzes = quizzes
-            self.best_score = data.get("best_score")
+            self.read_file(STATE_FILE)
             print(f"📂 저장된 데이터를 불러왔습니다. "
                   f"(퀴즈 {len(self.quizzes)}개, 최고점수 {self.best_score_text()})")
+            return
         except (json.JSONDecodeError, KeyError, TypeError, OSError):
-            print("⚠️ state.json 파일이 손상되어 기본 퀴즈 데이터로 복구합니다.")
+            print("⚠️ state.json 파일이 손상되었습니다.")
+
+        try:
+            self.read_file(BACKUP_FILE)
+            self.save_data()
+            print(f"🗂️ 백업 파일(state.json.bak)에서 복구했습니다. "
+                  f"(퀴즈 {len(self.quizzes)}개, 최고점수 {self.best_score_text()})")
+        except (json.JSONDecodeError, KeyError, TypeError, OSError):
+            print("⚠️ 백업 파일도 사용할 수 없어 기본 퀴즈 데이터로 복구합니다.")
             self.reset_to_default()
+
+    def read_file(self, path):
+        """JSON 파일을 읽어 퀴즈 목록과 최고 점수에 넣는다 (문제가 있으면 예외 발생)"""
+        with open(path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        quizzes = []
+        for item in data["quizzes"]:
+            quiz = Quiz(item["question"], item["choices"], item["answer"])
+            quizzes.append(quiz)
+
+        self.quizzes = quizzes
+        self.best_score = data.get("best_score")
 
     def reset_to_default(self):
         """기본 퀴즈로 되돌리고 바로 저장한다"""
@@ -114,7 +129,7 @@ class QuizGame:
         self.save_data()
 
     def save_data(self):
-        """퀴즈 목록과 최고 점수를 state.json에 저장한다"""
+        """퀴즈 목록과 최고 점수를 state.json에 저장하고, 백업 파일도 함께 만든다"""
         quiz_list = []
         for quiz in self.quizzes:
             quiz_list.append(quiz.to_dict())
@@ -127,8 +142,10 @@ class QuizGame:
         try:
             with open(STATE_FILE, "w", encoding="utf-8") as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
+            with open(BACKUP_FILE, "w", encoding="utf-8") as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
         except OSError:
-            print("⚠️ 데이터를 저장하지 못했습니다.")
+            print("⚠️ 데이터를 저장하지 못했습니다. 폴더 권한이나 디스크 공간을 확인해 주세요.")
 
     def best_score_text(self):
         """최고 점수를 화면에 보여줄 글자로 바꿔 준다"""
