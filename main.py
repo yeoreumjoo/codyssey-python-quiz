@@ -186,8 +186,14 @@ class QuizGame:
         print()
         print("=" * 40)
         print(f"🏆 결과: {total}문제 중 {correct_count}문제 정답! ({score}점)")
-        print("=" * 40)
 
+        if self.best_score is None or score > self.best_score:
+            self.best_score = score
+            self.save_data()
+            print("🎉 새로운 최고 점수입니다!")
+        else:
+            print(f"현재 최고 점수는 {self.best_score}점입니다.")
+        print("=" * 40)
     def get_text(self, prompt):
         """빈칸이 아닌 글자를 받을 때까지 계속 묻는다"""
         while True:
@@ -234,6 +240,14 @@ class QuizGame:
         for i, quiz in enumerate(self.quizzes, start=1):
             print(f"[{i}] {quiz.question}")
         print("-" * 40)
+    def show_score(self):
+        """최고 점수를 보여준다"""
+        if self.best_score is None:
+            print("⚠️ 아직 퀴즈를 푼 기록이 없습니다. 먼저 퀴즈를 풀어 보세요!")
+            return
+
+        print()
+        print(f"🏆 최고 점수: {self.best_score}점")
     def show_menu(self):
         """메인 메뉴를 화면에 보여준다"""
         print()
@@ -260,7 +274,7 @@ class QuizGame:
             elif choice == 3:
                 self.show_list()
             elif choice == 4:
-                print("🏆 점수 확인 (준비 중)")
+                self.show_score()
             elif choice == 5:
                 self.save_data()
                 print("💾 저장 완료! 👋 게임을 종료합니다. 다음에 또 만나요!")
