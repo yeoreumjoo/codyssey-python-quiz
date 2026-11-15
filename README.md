@@ -136,3 +136,4 @@ codyssey-python-quiz/
 - 기능 단위로 커밋했습니다. (`Feat:` 기능, `Docs:` 문서)
 - 퀴즈 풀기 기능은 `feature/quiz-play` 브랜치에서 개발한 뒤 `main`에 병합했습니다.
 - 사용한 Git 명령어: `init`, `add`, `commit`, `push`, `pull`, `checkout`, `merge`, `clone`
+- clone·pull 실습: 다른 폴더에 clone해서 수정·push한 뒤, 원래 폴더에서 pull로 받아왔습니다.
