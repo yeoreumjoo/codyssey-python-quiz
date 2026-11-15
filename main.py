@@ -67,6 +67,27 @@ class QuizGame:
         self.quizzes = create_default_quizzes()  # 퀴즈 목록 (list)
         self.best_score = None                   # 최고 점수 (아직 안 풀었으면 None)
 
+    def get_number(self, prompt, min_value, max_value):
+        """min_value~max_value 사이의 숫자를 받을 때까지 계속 묻는다"""
+        while True:
+            text = input(prompt).strip()
+
+            if text == "":
+                print(f"⚠️ 입력이 비어 있습니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
+                continue
+
+            try:
+                number = int(text)
+            except ValueError:
+                print(f"⚠️ 숫자가 아닙니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
+                continue
+
+            if number < min_value or number > max_value:
+                print(f"⚠️ 범위를 벗어났습니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
+                continue
+
+            return number
+
     def show_menu(self):
         """메인 메뉴를 화면에 보여준다"""
         print()
@@ -84,23 +105,30 @@ class QuizGame:
         """메뉴를 보여주고, 종료를 고를 때까지 반복한다"""
         while True:
             self.show_menu()
-            choice = input("선택: ")
+            choice = self.get_number("선택: ", 1, 5)
 
-            if choice == "1":
+            if choice == 1:
                 print("📝 퀴즈 풀기 (준비 중)")
-            elif choice == "2":
+            elif choice == 2:
                 print("📌 퀴즈 추가 (준비 중)")
-            elif choice == "3":
+            elif choice == 3:
                 print("📋 퀴즈 목록 (준비 중)")
-            elif choice == "4":
+            elif choice == 4:
                 print("🏆 점수 확인 (준비 중)")
-            elif choice == "5":
+            elif choice == 5:
                 print("👋 게임을 종료합니다. 다음에 또 만나요!")
                 break
-            else:
-                print("⚠️ 잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+
+
+def main():
+    """프로그램 시작점"""
+    game = QuizGame()
+    try:
+        game.run()
+    except (KeyboardInterrupt, EOFError):
+        print()
+        print("⚠️ 입력이 중단되어 프로그램을 안전하게 종료합니다.")
 
 
 if __name__ == "__main__":
-    game = QuizGame()
-    game.run()
+    main()
